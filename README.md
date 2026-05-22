@@ -1,159 +1,93 @@
 # GasFree Pay
 
-GasFree Pay is a beginner-friendly Base Sepolia dApp that uses Universal Gas Framework (UGF) so users can pay or mint onchain without manually handling ETH gas.
+> **Gasless onchain actions on Base Sepolia — pay with Mock USD, forget ETH ever existed.**
 
-Users pay with `TYI_MOCK_USD`; UGF handles quote, settlement, execution, and confirmation.
+Built for the **UGF Hackathon** · Payments + Minting tracks
 
-Built for the UGF Hackathon - Payments and Minting tracks.
+---
 
-## Demo Flows
+## The Problem We Solve
 
-- Product checkout with TYI Mock USD.
-- ERC-721 badge minting through UGF `sponsorAndExecute`.
-- Wallet profile showing Base Sepolia ETH, TYI balance, and demo readiness.
-- Merchant/product dashboard with seeded demo products.
+Every beginner hits the same wall: _"You need ETH to do anything."_
 
-## Public Testnet Values
+Before a user can buy, mint, or send — they need gas. That means going to a CEX, buying ETH, bridging it, waiting for confirmations, and hoping they got the amount right. Most people quit here.
 
-```text
-Network: Base Sepolia
-Chain ID: 84532
-RPC URL: https://sepolia.base.org
-Block Explorer: https://sepolia.basescan.org
-TYI_MOCK_USD: 0x27DC1C167AeF232bb1e21073304B526726a8727e
-BadgeMinter: 0x280E0Ac7D716602718CA6d4865B2Cc92f79F038f
+**GasFree Pay removes that wall entirely.**
+
+Users connect their wallet, hold `TYI_MOCK_USD`, and interact onchain. UGF handles the gas side invisibly. No ETH. No bridging. No confusion.
+
+---
+
+## What We Built
+
+Two complete, real user flows on Base Sepolia:
+
+| Flow | What happens |
+|---|---|
+| **Product Checkout** | User buys a demo product with TYI Mock USD — UGF settles and executes the transfer |
+| **Badge Minting** | User mints an ERC-721 badge via UGF `sponsorAndExecute` — NFT lands in their wallet |
+
+Both flows follow the full UGF lifecycle: quote → payment → settlement → sponsor → execute → confirm.
+
+---
+
+## How We Are Different
+
+Most hackathon UGF demos stop at "here's a button that calls the SDK." GasFree Pay goes further:
+
+- **Two complete tracks** — Payments AND Minting, not just one.
+- **Real backend** — Express + Supabase stores users, merchants, products, transactions, and quote cache. Not just a frontend toy.
+- **JWT wallet authentication** — wallet-signed nonce auth, not just `msg.sender` checks.
+- **Deployed ERC-721 contract** — `BadgeMinter.sol` is live on Base Sepolia with duplicate-mint protection per wallet.
+- **Merchant dashboard** — seeded product catalog, transaction history, ready for a real checkout flow.
+- **UX-first profile page** — shows ETH balance, TYI balance, and a "Ready for demo" indicator so users know their wallet state at a glance.
+
+---
+
+## UGF Integration
+
+![alt text](image-1.png)
+
+UGF packages used:
+- `@tychilabs/ugf-testnet-js` — backend quote, settle, execute
+- `@tychilabs/react-ugf` — frontend modal and payment flow
+
+---
+
+## Architecture
+
+![alt text](image.png)
 ```
 
-## How It Works
-
-```text
-User has TYI_MOCK_USD
-  -> pays product or mints badge
-  -> React UGF modal opens
-  -> UGF gets quote
-  -> user approves TYI payment
-  -> UGF settles payment
-  -> UGF sponsors and executes Base Sepolia transaction
-  -> app shows success / BaseScan proof
-```
-
-UGF lifecycle:
-
-1. Wallet authentication/signature.
-2. `quote.get` returns quote and digest.
-3. `payment.x402.execute` settles the TYI payment.
-4. `chains.evm.sponsorAndExecute` sponsors gas and executes the transaction.
-5. App stores and displays the confirmed transaction.
+---
 
 ## Tech Stack
 
-Frontend:
+**Frontend** — React · Vite · React Router · Ethers.js · `@tychilabs/react-ugf`
 
-- React
-- Vite
-- React Router
-- Ethers.js
-- `@tychilabs/react-ugf`
+**Backend** — Node.js · Express · Supabase/PostgreSQL · JWT wallet auth · `@tychilabs/ugf-testnet-js`
 
-Backend:
+**Contracts** — Solidity · Hardhat · OpenZeppelin ERC-721
 
-- Node.js
-- Express
-- Supabase/PostgreSQL
-- JWT wallet auth
-- Ethers.js
-- `@tychilabs/ugf-testnet-js`
+**Network** — Base Sepolia (Chain ID `84532`)
 
-Contracts:
+---
 
-- Solidity
-- Hardhat
-- OpenZeppelin ERC-721
+## Public Testnet Addresses
 
-## Project Structure
+```
+Network:       Base Sepolia
+Chain ID:      84532
+RPC:           https://sepolia.base.org
+Explorer:      https://sepolia.basescan.org
 
-```text
-frontend/
-  src/
-    App.jsx
-    hooks/useWallet.jsx
-    pages/
-      Home.jsx
-      Profile.jsx
-      Onboard.jsx
-      Pay.jsx
-      BadgeMint.jsx
-      MerchantDashboard.jsx
-      MerchantNew.jsx
-      History.jsx
-      Widget.jsx
-
-backend/
-  src/
-    index.js
-    db/
-      migrate.js
-      seed.js
-      pool.js
-    routes/
-      auth.js
-      faucet.js
-      merchants.js
-      payment.js
-      products.js
-    services/
-      ugf.js
-
-contracts/
-  contracts/
-    BadgeMinter.sol
-  deploy.js
-  hardhat.config.js
+TYI_MOCK_USD:  0x27DC1C167AeF232bb1e21073304B526726a8727e
+BadgeMinter:   0x280E0Ac7D716602718CA6d4865B2Cc92f79F038f
 ```
 
-## Environment Files
+---
 
-Do not commit real `.env` files. Use the examples:
-
-```text
-backend/.env.example
-frontend/.env.example
-```
-
-Backend sensitive values:
-
-```env
-DATABASE_URL=postgresql://user:password@host:5432/postgres
-JWT_SECRET=replace_with_random_64_char_secret
-UGF_SPONSOR_PRIVATE_KEY=0xreplace_with_sponsor_wallet_private_key
-```
-
-Backend public values:
-
-```env
-UGF_TOKEN_ADDRESS=0x27DC1C167AeF232bb1e21073304B526726a8727e
-UGF_CHAIN_ID=84532
-RPC_URL=https://sepolia.base.org
-PORT=3001
-FRONTEND_URL=http://localhost:5173
-```
-
-Frontend public values:
-
-```env
-VITE_BADGE_CONTRACT=0x280E0Ac7D716602718CA6d4865B2Cc92f79F038f
-VITE_TYI_ADDRESS=0x27DC1C167AeF232bb1e21073304B526726a8727e
-```
-
-## Setup
-
-Full setup instructions are in:
-
-```text
-SETUP.md
-```
-
-Quick local setup:
+## Quick Start
 
 ```powershell
 # Backend
@@ -171,99 +105,16 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-Open:
+Open `http://localhost:5173` · Backend health: `http://localhost:3001/health`
 
-```text
-http://localhost:5173
-```
+Full setup: see [`SETUP.md`](./SETUP.md) · Full docs: see [`PROJECT_DOCUMENTATION.md`](./PROJECT_DOCUMENTATION.md)
 
-Backend health check:
-
-```text
-http://localhost:3001/health
-```
-
-## Contracts
-
-Compile:
-
-```powershell
-cd contracts
-npm.cmd install
-npm.cmd run compile
-```
-
-Deploy a new BadgeMinter only if needed:
-
-```powershell
-npm.cmd run deploy:base-sepolia
-```
-
-Current deployed contract:
-
-```text
-0x280E0Ac7D716602718CA6d4865B2Cc92f79F038f
-```
-
-## Demo Products
-
-Run:
-
-```powershell
-cd backend
-npm.cmd run seed
-```
-
-Seeded products:
-
-```text
-Hackathon Coffee - $0.01
-Builder Badge Tip - $0.02
-Creator Pass - $0.05
-```
-
-## Recommended Demo Script
-
-1. Open the app.
-2. Connect MetaMask on Base Sepolia.
-3. Open Profile and show TYI balance.
-4. Open Mint Badge.
-5. Mint `Hackathon Builder`.
-6. Show success and BaseScan link.
-7. Explain that the user paid with TYI Mock USD and UGF handled the gas.
-
-Optional payment demo:
-
-1. Open Shop.
-2. Choose `Hackathon Coffee - $0.01`.
-3. Approve UGF payment.
-4. Show transaction history.
-
-## Submission Notes
-
-Safe to submit:
-
-- Source code
-- `.env.example` files
-- `README.md`
-- `SETUP.md`
-- `3_Project_Documentation.md`
-- Demo video
-
-Do not submit:
-
-- Real `.env` files
-- Private keys
-- Supabase passwords
-- `node_modules`
-- `dist`
-- Hardhat `artifacts` or `cache`
+---
 
 ## Resources
 
 - UGF Docs: https://universalgasframework.com/docs
-- UGF Testnet Docs: https://universalgasframework.com/docs/testnet
-- UGF Faucet: https://universalgasframework.com/faucets
-- UGF SDK: https://www.npmjs.com/package/@tychilabs/ugf-testnet-js
-- React UGF SDK: https://www.npmjs.com/package/@tychilabs/react-ugf
+- Faucet: https://universalgasframework.com/faucets
 - BaseScan Sepolia: https://sepolia.basescan.org
+- SDK: https://www.npmjs.com/package/@tychilabs/ugf-testnet-js
+- React SDK: https://www.npmjs.com/package/@tychilabs/react-ugf
