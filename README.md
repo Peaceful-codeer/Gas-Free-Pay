@@ -46,7 +46,7 @@ Most hackathon UGF demos stop at "here's a button that calls the SDK." GasFree P
 
 ## UGF Integration
 
-![alt text](image-1.png)
+![alt text](ugf.png)
 
 UGF packages used:
 - `@tychilabs/ugf-testnet-js` — backend quote, settle, execute
@@ -56,7 +56,7 @@ UGF packages used:
 
 ## Architecture
 
-![alt text](image.png)
+![alt text](architecture.png)
 ```
 
 ---
